@@ -4,15 +4,52 @@ using UnityEngine;
 using UnityEngine.AI;
 
 public class Vigilante : MonoBehaviour {
+
+    //Estados del vigilante
+    enum State {Idle, TurningRight, TurningLeft, Walking };
+    private State state;
+
+
     public Transform target;
-    NavMeshAgent agente;
-	
-	void Start () {
-        agente = GetComponent<NavMeshAgent>();
+    public Transform[] targets = new Transform[4];
+
+    NavMeshAgent agent;
+    private Animator animator;
+
+    
+
+
+
+    void Start () {
+        agent = GetComponent<NavMeshAgent>();
+        animator = GetComponent<Animator>();
 	}
 	
-	// Update is called once per frame
 	void Update () {
-        agente.destination = target.position;
+        switch(state) {
+            case State.Idle:
+                Idle();
+                break;
+            case State.TurningRight:
+                RotateNextTarget();
+                break;
+        }
     }
+
+    private void Idle()
+    {
+        agent.isStopped = true;
+        Invoke("ChangeState", 6);
+    }
+    
+    private void ChangeState()
+    {
+        state = State.TurningRight;
+        animator.SetBool("turningRight", true);
+    }
+    private void RotateNextTarget()
+    {
+        transform.Rotate(0, 1, 0);
+    }
+
 }
