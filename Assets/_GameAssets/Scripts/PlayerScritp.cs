@@ -4,26 +4,32 @@ using UnityEngine;
 using UnityEngine.AI;
 
 public class PlayerScritp : MonoBehaviour {
-    enum Estado { Idle, Walk, Run, Attack, Tired, Dead, InLove };
+    enum Estado { Idle, Walk, Jump, Run, Attack, Tired, Dead, InLove };
 
-    [Header("Entorno")]
+    [Header("Environment")]
     public GameObject targetCircle;
+    public LayerMask layerSuelo;
 
-    [Header("Comportamiento")]
+    [Header("Behavior")]
     public int speed;
     public int followDistance;
     public int rotationSpeed;
 
+    [Header("ReferencePoints")]
+    public Transform posPies;
+
     
     //ANIMATOR CONSTANTS
     const string ANIM_WALKING = "andando";
-    
+    const string ANIM_JUMPING = "saltando";
+
 
     NavMeshAgent agent;
     Animator animator;
     Vector3 prevPosition;//Posición del último frame
     float xPos;//Posicion del ratón
-    Estado estado = Estado.Idle;
+    Estado estado = Estado.Idle;//Estado del player
+    float floorDetectorRadius = 0.5f;//Radio de deteccion del suelo
 
     private void Start()
     {
@@ -37,12 +43,17 @@ public class PlayerScritp : MonoBehaviour {
         {
             ManageMouseClick();
         }
+
         switch (estado) {
             case Estado.Walk:
                 if (!agent.pathPending)
                 {
                     CheckTarget();
                 }
+                CheckJump();
+                break;
+            case Estado.Jump:
+                CheckEndJump();
                 break;
         }
        
@@ -60,7 +71,6 @@ public class PlayerScritp : MonoBehaviour {
             case Estado.Idle:
                 StartWalk(rch);
                 break;
-
         }
     }
 
@@ -79,6 +89,27 @@ public class PlayerScritp : MonoBehaviour {
         {
             estado = Estado.Idle;
             animator.SetBool(ANIM_WALKING, false);
+        }
+    }
+
+    private void CheckJump()
+    {
+        Collider[] col = Physics.OverlapSphere(posPies.position, floorDetectorRadius, layerSuelo);
+        if (col.Length == 0)
+        {
+            estado = Estado.Jump;
+            animator.SetBool(ANIM_JUMPING, true);
+        } 
+    }
+
+    private void CheckEndJump()
+    {
+        print("Checking jump");
+        Collider[] col = Physics.OverlapSphere(posPies.position, floorDetectorRadius, layerSuelo);
+        if (col.Length > 0)
+        {
+            estado = Estado.Walk;
+            animator.SetBool(ANIM_JUMPING, false);
         }
     }
 }
