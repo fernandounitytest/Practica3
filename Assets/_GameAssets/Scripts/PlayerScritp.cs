@@ -10,6 +10,7 @@ public class PlayerScritp : MonoBehaviour {
     public GameObject targetCircle;
     public LayerMask layerSuelo;
 
+
     [Header("Behavior")]
     public int speed;
     public int followDistance;
@@ -29,7 +30,7 @@ public class PlayerScritp : MonoBehaviour {
     Vector3 prevPosition;//Posición del último frame
     float xPos;//Posicion del ratón
     Estado estado = Estado.Idle;//Estado del player
-    float floorDetectorRadius = 0.5f;//Radio de deteccion del suelo
+    float floorDetectorRadius = 1f;//Radio de deteccion del suelo
 
     private void Start()
     {
@@ -63,15 +64,19 @@ public class PlayerScritp : MonoBehaviour {
 
     private void ManageMouseClick()
     {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        Ray ray = GlobalGameManager.activeCamera.ScreenPointToRay(Input.mousePosition);
         RaycastHit rch;
-        bool hasTouch = Physics.Raycast(ray, out rch);
-        switch (estado)
+        bool hasTouch = Physics.Raycast(ray, out rch, Mathf.Infinity, layerSuelo);
+        if (hasTouch)
         {
-            case Estado.Idle:
-                StartWalk(rch);
-                break;
+            switch (estado)
+            {
+                case Estado.Idle:
+                    StartWalk(rch);
+                    break;
+            }
         }
+        
     }
 
     private void StartWalk(RaycastHit rch)
@@ -104,7 +109,6 @@ public class PlayerScritp : MonoBehaviour {
 
     private void CheckEndJump()
     {
-        print("Checking jump");
         Collider[] col = Physics.OverlapSphere(posPies.position, floorDetectorRadius, layerSuelo);
         if (col.Length > 0)
         {

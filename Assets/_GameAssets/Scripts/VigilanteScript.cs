@@ -10,7 +10,7 @@ public class VigilanteScript : MonoBehaviour {
     enum State {Idle, Walking };
     private State state;
 
-    private Transform target;
+    private Vector3 target;
 
     [Header("Puntos de patrulla")]
     public Transform[] targets = new Transform[4];
@@ -60,13 +60,24 @@ public class VigilanteScript : MonoBehaviour {
 
     }
 
+
+    public void SetExternalTarget(Vector3 targetPosition)
+    {
+        if (state != State.Walking)
+        {
+            state = State.Walking;
+            animator.SetBool("walking", true);
+        }
+        target = targetPosition;
+        agent.destination = target;
+    }
+
     private void SetNewTarget()
     {
-        target = targets[Random.Range(0, targets.Length)];
+        target = targets[Random.Range(0, targets.Length)].position;
+        agent.destination = target;
         state = State.Walking;
-        agent.destination = target.position;
         animator.SetBool("walking", true);
-
     }
 
     private void Idle()
@@ -75,7 +86,6 @@ public class VigilanteScript : MonoBehaviour {
     }
     private void CheckTargets()
     {
-        print("Checkingtargets");
         if (agent.remainingDistance <= agent.stoppingDistance)
         {
             state = State.Idle;
