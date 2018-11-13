@@ -43,6 +43,9 @@ public class PlayerScritp : MonoBehaviour {
         if (Input.GetButtonDown("Fire1"))
         {
             ManageMouseClick();
+        } else if (Input.touchCount > 0)
+        {
+            ManageTouchTap();
         }
 
         switch (estado) {
@@ -76,7 +79,22 @@ public class PlayerScritp : MonoBehaviour {
                     break;
             }
         }
-        
+    }
+
+    private void ManageTouchTap()
+    {
+        Ray ray = GlobalGameManager.activeCamera.ScreenPointToRay(Input.touches[0].position);
+        RaycastHit rch;
+        bool hasTouch = Physics.Raycast(ray, out rch, Mathf.Infinity, layerSuelo);
+        if (hasTouch)
+        {
+            switch (estado)
+            {
+                case Estado.Idle:
+                    StartWalk(rch);
+                    break;
+            }
+        }
     }
 
     private void StartWalk(RaycastHit rch)
