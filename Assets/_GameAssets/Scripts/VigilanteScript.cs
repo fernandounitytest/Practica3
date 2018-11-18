@@ -2,22 +2,20 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.UI;
 
 public class VigilanteScript : MonoBehaviour {
 
     //Estados del vigilante
-    enum State {Idle, Walking };
+    enum State {Idle, Walking, Obsessed };
     private State state;
 
     private Vector3 target;
 
     [Header("Puntos de patrulla")]
     public Transform[] targets = new Transform[4];
-    [Header("UI")]
-    public Text dtp;//Distance to player
-    public Text atp;//Angle to player
     
+    [Header("Cameras")]
+    public CamerasManager cm;
 
 
     private NavMeshAgent agent;
@@ -53,11 +51,25 @@ public class VigilanteScript : MonoBehaviour {
 
     private void CheckPlayer()
     {
-        Vector3 vDistanceToPlayer = player.position - transform.position;
-        float angle = Vector3.Angle(vDistanceToPlayer, transform.forward);
-        dtp.text = "DTP:" + vDistanceToPlayer.magnitude;
-        atp.text = "ATP:" + angle;
-
+        float vDistanceToPlayer = Vector3.Distance(transform.position, player.transform.position);
+        Vector3 direccion = Vector3.Normalize(player.transform.position - transform.position);
+        float angle = Vector3.Angle(direccion, transform.forward);
+        if (vDistanceToPlayer < detectionDistance && angle < detectionDegrees)
+        {
+            Debug.DrawLine(transform.position, player.transform.position, Color.red, 1);
+            RaycastHit rch;
+            if (Physics.Raycast(
+                transform.position,
+                direccion,
+                out rch,
+                Mathf.Infinity))
+            {
+                if (rch.transform.gameObject.name == "Paniagua")
+                {
+                    player.GetComponent<PlayerScript>().Kill();
+                }
+            }
+        }
     }
 
 
@@ -65,7 +77,7 @@ public class VigilanteScript : MonoBehaviour {
     {
         if (state != State.Walking)
         {
-            state = State.Walking;
+            state = State.Obsessed;
             animator.SetBool("walking", true);
         }
         target = targetPosition;
@@ -74,10 +86,14 @@ public class VigilanteScript : MonoBehaviour {
 
     private void SetNewTarget()
     {
-        target = targets[Random.Range(0, targets.Length)].position;
-        agent.destination = target;
-        state = State.Walking;
-        animator.SetBool("walking", true);
+        //Cuando está distraido por un ruido o evento, abandona la patrualla
+        if (state != State.Obsessed)
+        {
+            target = targets[Random.Range(0, targets.Length)].position;
+            agent.destination = target;
+            state = State.Walking;
+            animator.SetBool("walking", true);
+        }
     }
 
     private void Idle()

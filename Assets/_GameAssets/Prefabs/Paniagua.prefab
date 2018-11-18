@@ -480,6 +480,21 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!1 &1463099339870486
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 4891890998918730}
+  m_Layer: 0
+  m_Name: PuntoGeneracionDistraccion
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!1 &1495539439167130
 GameObject:
   m_ObjectHideFlags: 1
@@ -2016,7 +2031,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1821698195892278}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 23.62, y: -4.3240357e-17, z: -24.33}
+  m_LocalPosition: {x: 1.4, y: -4.3240357e-17, z: -24.33}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4921588565510042}
@@ -2028,6 +2043,7 @@ Transform:
   - {fileID: 4879209988629390}
   - {fileID: 4811288380470074}
   - {fileID: 4728155590211620}
+  - {fileID: 4891890998918730}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -2097,6 +2113,19 @@ Transform:
   m_Father: {fileID: 4818731036386524}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &4891890998918730
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1463099339870486}
+  m_LocalRotation: {x: -0.29512447, y: 0, z: 0, w: 0.9554588}
+  m_LocalPosition: {x: 0, y: 1.524, z: 0.329}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 4818731036386524}
+  m_RootOrder: 9
+  m_LocalEulerAnglesHint: {x: -34.33, y: 0, z: 0}
 --- !u!4 &4907962330734888
 Transform:
   m_ObjectHideFlags: 1
@@ -2235,7 +2264,7 @@ Rigidbody:
   m_Mass: 1
   m_Drag: 0
   m_AngularDrag: 0.05
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
@@ -2276,6 +2305,9 @@ MonoBehaviour:
   followDistance: 1
   rotationSpeed: 3
   posPies: {fileID: 4811288380470074}
+  puntoGeneracionDistraccion: {fileID: 0}
+  prefabDistraccion: {fileID: 0}
+  fuerzaLanzamientoDistraccion: 0
 --- !u!136 &136753184780148728
 CapsuleCollider:
   m_ObjectHideFlags: 1

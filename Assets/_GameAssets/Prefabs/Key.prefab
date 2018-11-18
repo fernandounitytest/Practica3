@@ -20,6 +20,9 @@ GameObject:
   m_Component:
   - component: {fileID: 4003807193409196}
   - component: {fileID: 95267220909654722}
+  - component: {fileID: 54067557818902664}
+  - component: {fileID: 65979278657855056}
+  - component: {fileID: 114482052826425290}
   m_Layer: 0
   m_Name: Key
   m_TagString: Untagged
@@ -50,8 +53,8 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1056123531042524}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -10.241891, y: 3.81, z: 2.58}
+  m_LocalRotation: {x: 0.023417685, y: -0.6834789, z: -0.021947613, w: -0.72926444}
+  m_LocalPosition: {x: 6.17, y: 9.839974, z: -23.95}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4596835185017122}
@@ -112,6 +115,33 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1241027830108696}
   m_Mesh: {fileID: 4300000, guid: 5abfc2d3b5ea5d64ca95d10d1a34b677, type: 3}
+--- !u!54 &54067557818902664
+Rigidbody:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1056123531042524}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!65 &65979278657855056
+BoxCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1056123531042524}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.5, y: 0.5, z: 0.5}
+  m_Center: {x: 0, y: 0.09, z: 0}
 --- !u!95 &95267220909654722
 Animator:
   serializedVersion: 3
@@ -129,3 +159,20 @@ Animator:
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
+--- !u!114 &114482052826425290
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1056123531042524}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f00ff8aa3e5da545925ff6dfb437f20, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animatorPuerta1: {fileID: 0}
+  animatorPuerta2: {fileID: 0}
+  prefabParticles: {fileID: 100000, guid: 921a3ff88856fe04ebc86b196fd8cc59, type: 2}
+  openDoorSound: {fileID: 8300000, guid: 80d08fa5dccc64ffa90d6734ce03512e, type: 3}
+  audioSource: {fileID: 0}
+  vigilante: {fileID: 0}

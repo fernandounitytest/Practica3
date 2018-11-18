@@ -8,11 +8,11 @@ public class PasoRoom1ToRoom2Script : MonoBehaviour {
     public Camera c2;
     private void OnTriggerExit(Collider other)
     {
-        if (room == 1)
+        if (other.gameObject.name=="Paniagua" && room == 1)
         {
             c1.gameObject.SetActive(false);
             c2.gameObject.SetActive(true);
-            GlobalGameManager.activeCamera = c2;
+            CamerasManager.activeCamera = c2;
             room = 2;
         }
     }

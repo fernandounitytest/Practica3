@@ -14,7 +14,7 @@ public class Key1Script : MonoBehaviour {
     {
         if (collision.gameObject.name == "Paniagua")
         {
-            Instantiate(prefabParticles, transform.position, Quaternion.identity);
+            Instantiate(prefabParticles, transform.position, transform.rotation);
             animatorPuerta1.SetBool("open", true);
             animatorPuerta2.SetBool("open", true);
             SetEnemyTarget();
