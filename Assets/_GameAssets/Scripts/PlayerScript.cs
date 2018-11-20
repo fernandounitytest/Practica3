@@ -36,6 +36,9 @@ public class PlayerScript : MonoBehaviour {
     //ANIMATOR CONSTANTS
     const string ANIM_WALKING = "andando";
     const string ANIM_JUMPING = "saltando";
+    const string ANIM_RUNNING = "corriendo";
+    const int WALK_SPEED = 2;
+    const int RUN_SPEED = 5;
 
 
     NavMeshAgent agent;
@@ -75,11 +78,30 @@ public class PlayerScript : MonoBehaviour {
                 if (!agent.pathPending)
                 {
                     CheckTarget();
+                    if (Input.GetKeyDown(KeyCode.R))
+                    {
+                        estado = Estado.Run;
+                        animator.SetBool(ANIM_RUNNING, true);
+                        agent.speed = RUN_SPEED;
+                    }
                 }
                 CheckJump();
                 break;
             case Estado.Jump:
                 CheckEndJump();
+                break;
+            case Estado.Run:
+                if (!agent.pathPending)
+                {
+                    CheckTarget();
+                    if (Input.GetKeyUp(KeyCode.R))
+                    {
+                        estado = Estado.Walk;
+                        animator.SetBool(ANIM_RUNNING, false);
+                        agent.speed = WALK_SPEED;
+                    }
+                }
+                CheckJump();
                 break;
         }
 
@@ -152,6 +174,7 @@ public class PlayerScript : MonoBehaviour {
         if (agent.remainingDistance <= agent.stoppingDistance)
         {
             estado = Estado.Idle;
+            animator.SetBool(ANIM_RUNNING, false);
             animator.SetBool(ANIM_WALKING, false);
         }
     }
@@ -189,6 +212,7 @@ public class PlayerScript : MonoBehaviour {
             this.estado = Estado.Dead;
             textGameOver.SetActive(true);
             textToReload.SetActive(true);
+            agent.isStopped = true;
             InvokeRepeating("CountDownToReload", 1, 1);
         }
     }

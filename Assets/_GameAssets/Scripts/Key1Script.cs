@@ -10,9 +10,9 @@ public class Key1Script : MonoBehaviour {
     public AudioSource audioSource;
     public VigilanteScript vigilante;
 
-    private void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter(Collider other)
     {
-        if (collision.gameObject.name == "Paniagua")
+        if (other.gameObject.name == "Paniagua")
         {
             Instantiate(prefabParticles, transform.position, transform.rotation);
             animatorPuerta1.SetBool("open", true);
@@ -22,6 +22,8 @@ public class Key1Script : MonoBehaviour {
             Destroy(gameObject);
         }
     }
+
+
 
     private void SetEnemyTarget()
     {
