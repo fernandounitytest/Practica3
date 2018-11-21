@@ -6,9 +6,9 @@ public class DistraccionScript : MonoBehaviour
 {
 
     public int timeToDestroy = 3;
-    private bool primeraVez = true;
     public int radioDistraccion = 10;
     public GameObject prefabParticles;
+
     private void OnCollisionEnter(Collision collision)
     {
         Instantiate(prefabParticles, transform.position, transform.rotation);
@@ -20,6 +20,6 @@ public class DistraccionScript : MonoBehaviour
                 hitColliders[i].gameObject.GetComponent<VigilanteScript>().SetExternalTarget(this.transform.position);
             }
         }
-        Destroy(gameObject);
+        Destroy(this.gameObject);
     }
 }

@@ -6,8 +6,14 @@ using UnityEngine.AI;
 public class VigilanteScript : MonoBehaviour {
 
     //Estados del vigilante
-    enum State {Idle, Walking, Obsessed };
+    enum State {Idle, Walking, Death };
+    private bool obsessed = false;
     private State state;
+
+    //ANIMATOR
+    private Animator animator;
+    private const string ESTADO_WALKING = "walking";
+    private const string ESTADO_DEAD = "death";
 
     private Vector3 target;
 
@@ -19,7 +25,6 @@ public class VigilanteScript : MonoBehaviour {
 
 
     private NavMeshAgent agent;
-    private Animator animator;
     private int MIN_TIME_TO_NEW_TARGET = 3;
     private int MAX_TIME_TO_NEW_TARGET = 5;
     private Transform player;
@@ -36,12 +41,16 @@ public class VigilanteScript : MonoBehaviour {
 
     void Update()
     {
+        if (state == State.Death)
+        {
+            agent.enabled = false;
+            return;
+        }
         CheckPlayer();
-
         switch (state)
         {
             case State.Idle:
-                Idle();
+                //Idle();
                 break;
             case State.Walking:
                 CheckTargets();
@@ -72,45 +81,56 @@ public class VigilanteScript : MonoBehaviour {
         }
     }
 
-
     public void SetExternalTarget(Vector3 targetPosition)
     {
+        agent.isStopped=true;
         if (state != State.Walking)
         {
-            state = State.Obsessed;
             animator.SetBool("walking", true);
+            state = State.Walking;
         }
         target = targetPosition;
         agent.destination = target;
+        obsessed = true;
     }
 
     private void SetNewTarget()
     {
-        //Cuando está distraido por un ruido o evento, abandona la patrualla
-        if (state != State.Obsessed)
+        //Cuando está distraido por un ruido o evento, abandona la patrulla
+        if (!obsessed)
         {
-            target = targets[Random.Range(0, targets.Length)].position;
-            agent.destination = target;
-            state = State.Walking;
-            animator.SetBool("walking", true);
+            if (agent.isActiveAndEnabled == true)
+            {
+                do
+                {
+                    target = targets[Random.Range(0, targets.Length)].position;
+                } while (Vector3.Distance(this.transform.position, target) < agent.stoppingDistance);
+                agent.destination = target;
+                state = State.Walking;
+                animator.SetBool(ESTADO_WALKING, true);
+            }
+        }
+    }
+
+    private void CheckTargets()
+    {
+        if (agent.isActiveAndEnabled==true && agent.remainingDistance <= agent.stoppingDistance)
+        {
+            state = State.Idle;
+            animator.SetBool("walking", false);
+            obsessed = false;
+            Invoke("SetNewTarget", Random.Range(MIN_TIME_TO_NEW_TARGET, MAX_TIME_TO_NEW_TARGET));
         }
     }
 
     private void Idle()
     {
-   
+
     }
-    private void CheckTargets()
+
+    public void Kill()
     {
-        if (agent.remainingDistance <= agent.stoppingDistance)
-        {
-            state = State.Idle;
-            animator.SetBool("walking", false);
-            Invoke("SetNewTarget", Random.Range(MIN_TIME_TO_NEW_TARGET, MAX_TIME_TO_NEW_TARGET));
-        }
+        state = State.Death;
+        animator.SetBool(ESTADO_DEAD, true);
     }
-
-    
-    
-
 }
