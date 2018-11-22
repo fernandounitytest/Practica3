@@ -6,7 +6,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 public class PlayerScript : MonoBehaviour {
-    enum Estado { Idle, Walk, Jump, Run, Shoot, Tired, Dead, InLove };
+    public enum Estado { Idle, Walk, Jump, Run, Shoot, Tired, Dead, InLove };
 
     [Header("Environment")]
     public GameObject targetCircle;
@@ -144,6 +144,10 @@ public class PlayerScript : MonoBehaviour {
         nuevoPetardo.GetComponent<Rigidbody>().AddRelativeForce(Vector3.forward * fuerzaLanzamientoDistraccion);
     }
 
+    public Estado GetEstado()
+    {
+        return this.estado;
+    }
 
     private void ManageMouseClick()
     {
@@ -289,6 +293,7 @@ public class PlayerScript : MonoBehaviour {
             rch.transform.gameObject.GetComponent<VigilanteScript>().Kill();
         }
     }
+
     public void PlayShootSound()
     {
         audioSource.loop = false;

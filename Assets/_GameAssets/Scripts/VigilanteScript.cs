@@ -27,7 +27,8 @@ public class VigilanteScript : MonoBehaviour {
     private NavMeshAgent agent;
     private int MIN_TIME_TO_NEW_TARGET = 3;
     private int MAX_TIME_TO_NEW_TARGET = 5;
-    private Transform player;
+    private Transform playerTransform;
+    private PlayerScript playerScript;
     private float detectionDistance = 10f; //Distancia de detección
     private float detectionDegrees = 25f; //Grados de vision
 
@@ -36,19 +37,17 @@ public class VigilanteScript : MonoBehaviour {
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
         SetNewTarget();
-        player = GameObject.Find("Paniagua").transform;
+        playerTransform = GameObject.Find("Paniagua").transform;
+        playerScript = GameObject.Find("Paniagua").GetComponent<PlayerScript>();
     }
 
     void Update()
     {
-        if (state == State.Death)
-        {
-            agent.enabled = false;
-            return;
-        }
-        CheckPlayer();
         switch (state)
         {
+            case State.Death:
+                agent.enabled = false;
+                return;
             case State.Idle:
                 //Idle();
                 break;
@@ -56,16 +55,18 @@ public class VigilanteScript : MonoBehaviour {
                 CheckTargets();
                 break;
         }
+        CheckPlayer();
+        EvaluarRuido();
     }
 
     private void CheckPlayer()
     {
-        float vDistanceToPlayer = Vector3.Distance(transform.position, player.transform.position);
-        Vector3 direccion = Vector3.Normalize(player.transform.position - transform.position);
+        float vDistanceToPlayer = Vector3.Distance(transform.position, playerTransform.transform.position);
+        Vector3 direccion = Vector3.Normalize(playerTransform.transform.position - transform.position);
         float angle = Vector3.Angle(direccion, transform.forward);
         if (vDistanceToPlayer < detectionDistance && angle < detectionDegrees)
         {
-            Debug.DrawLine(transform.position, player.transform.position, Color.red, 1);
+            //Debug.DrawLine(transform.position, player.transform.position, Color.red, 1);
             RaycastHit rch;
             if (Physics.Raycast(
                 transform.position,
@@ -75,7 +76,7 @@ public class VigilanteScript : MonoBehaviour {
             {
                 if (rch.transform.gameObject.name == "Paniagua")
                 {
-                    player.GetComponent<PlayerScript>().Kill();
+                    playerTransform.GetComponent<PlayerScript>().Kill();
                 }
             }
         }
@@ -83,10 +84,11 @@ public class VigilanteScript : MonoBehaviour {
 
     public void SetExternalTarget(Vector3 targetPosition)
     {
-        agent.isStopped=true;
+        print("setting external target");
+        CancelInvoke();
         if (state != State.Walking)
         {
-            animator.SetBool("walking", true);
+            animator.SetBool(ESTADO_WALKING, true);
             state = State.Walking;
         }
         target = targetPosition;
@@ -104,7 +106,8 @@ public class VigilanteScript : MonoBehaviour {
                 do
                 {
                     target = targets[Random.Range(0, targets.Length)].position;
-                } while (Vector3.Distance(this.transform.position, target) < agent.stoppingDistance);
+                    agent.destination = target;
+                } while (Vector3.Distance(this.transform.position, target) < agent.stoppingDistance*2);
                 agent.destination = target;
                 state = State.Walking;
                 animator.SetBool(ESTADO_WALKING, true);
@@ -117,7 +120,7 @@ public class VigilanteScript : MonoBehaviour {
         if (agent.isActiveAndEnabled==true && agent.remainingDistance <= agent.stoppingDistance)
         {
             state = State.Idle;
-            animator.SetBool("walking", false);
+            animator.SetBool(ESTADO_WALKING, false);
             obsessed = false;
             Invoke("SetNewTarget", Random.Range(MIN_TIME_TO_NEW_TARGET, MAX_TIME_TO_NEW_TARGET));
         }
@@ -132,5 +135,17 @@ public class VigilanteScript : MonoBehaviour {
     {
         state = State.Death;
         animator.SetBool(ESTADO_DEAD, true);
+    }
+
+    private void EvaluarRuido()
+    {
+        switch(playerScript.GetEstado()){
+            case PlayerScript.Estado.Walk:
+                print("DESDE VIGILANTE, PLAYER ANDANDO");
+                break;
+            case PlayerScript.Estado.Run:
+                print("DESDE VIGILANTE, PLAYER CORRIENDO");
+                break;
+        }
     }
 }
