@@ -3,7 +3,17 @@ guid: f03eac99888d49740932e0dc396e5677
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - targetCircle: {instanceID: 0}
+  - posPies: {instanceID: 0}
+  - puntoGeneracionDistraccion: {instanceID: 0}
+  - prefabDistraccion: {instanceID: 0}
+  - gameOverCamera: {instanceID: 0}
+  - textGameOver: {instanceID: 0}
+  - textToReload: {instanceID: 0}
+  - walkSound: {fileID: 8300000, guid: 6020deca71a09574ab137962f0881ebc, type: 3}
+  - runSound: {fileID: 8300000, guid: 26f614d32687aa2438121b1aa3a290da, type: 3}
+  - shotSound: {fileID: 8300000, guid: 0a07e35219997274a88f76227269bf2a, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

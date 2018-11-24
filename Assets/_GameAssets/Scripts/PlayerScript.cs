@@ -43,10 +43,12 @@ public class PlayerScript : MonoBehaviour {
     const string ANIM_JUMPING = "saltando";
     const string ANIM_RUNNING = "corriendo";
     const string SHOOT_TRIGGER = "disparando";
+    const string ANIM_BLENDTREE_TIME_RUNNING = "tiempoCorriendo";
     const string ANIM_WALKING_ENEMY = "walking";
     const int WALK_SPEED = 2;
     const int RUN_SPEED = 5;
-
+    float timeRunning = 0;
+    const float BLEND_MULTIPLIER = 5f;
 
     AudioSource audioSource;
     NavMeshAgent agent;
@@ -57,7 +59,8 @@ public class PlayerScript : MonoBehaviour {
     int timeToReload = 5;//Tiempo para recargar la escena
     const int ID_FLOOR_LAYER = 8;
     const int ID_ENEMY_LAYER = 9;
-    const int SHOOT_DISTANCE = 10; 
+    const int SHOOT_DISTANCE = 10;
+    RaycastHit rchTmp;
 
     private void Start()
     {
@@ -79,11 +82,7 @@ public class PlayerScript : MonoBehaviour {
         {
             ManageMouseClick();
         }
-        else if (Input.touchCount > 0)
-        {
-            ManageTouchTap();
-        }
-
+        
         switch (estado)
         {
             case Estado.Walk:
@@ -109,14 +108,23 @@ public class PlayerScript : MonoBehaviour {
                 if (!agent.pathPending)
                 {
                     CheckTarget();
+                    if (Input.GetKey(KeyCode.R))
+                    {
+                        timeRunning += Time.deltaTime * BLEND_MULTIPLIER;
+                        animator.SetFloat(ANIM_BLENDTREE_TIME_RUNNING, timeRunning);
+                    }
                     if (Input.GetKeyUp(KeyCode.R))
                     {
+                        timeRunning = 0;
+                        animator.SetFloat(ANIM_BLENDTREE_TIME_RUNNING, timeRunning);
                         estado = Estado.Walk;
                         animator.SetBool(ANIM_RUNNING, false);
                         agent.speed = WALK_SPEED;
                         audioSource.Stop();
                         audioSource.loop = true;
-                        audioSource.PlayOneShot(walkSound);
+                        //audioSource.PlayOneShot(walkSound);
+                        audioSource.clip = walkSound;
+                        audioSource.Play();
                     }
                 }
                 CheckJump();
@@ -151,6 +159,10 @@ public class PlayerScript : MonoBehaviour {
 
     private void ManageMouseClick()
     {
+        if (estado == Estado.Shoot)
+        {
+            return;
+        }
         Ray ray = CamerasManager.activeCamera.ScreenPointToRay(Input.mousePosition);
         RaycastHit rch;
         bool hasTouch = Physics.Raycast(ray, out rch);
@@ -159,6 +171,7 @@ public class PlayerScript : MonoBehaviour {
             switch (estado)
             {
                 case Estado.Idle:
+                    rchTmp = rch;
                     ShootEnemy(rch);
                     break;
             }
@@ -177,23 +190,7 @@ public class PlayerScript : MonoBehaviour {
             }
         }
     }
-        
-    private void ManageTouchTap()
-    {
-        Ray ray = CamerasManager.activeCamera.ScreenPointToRay(Input.touches[0].position);
-        RaycastHit rch;
-        bool hasTouch = Physics.Raycast(ray, out rch, Mathf.Infinity);
-        if (hasTouch && rch.transform.gameObject.layer == ID_FLOOR_LAYER)
-        {
-            switch (estado)
-            {
-                case Estado.Idle:
-                    StartWalk(rch);
-                    break;
-            }
-        }
-    }
-
+            
     private void StartWalk(RaycastHit rch)
     {
         estado = Estado.Walk;
@@ -203,19 +200,20 @@ public class PlayerScript : MonoBehaviour {
         animator.SetBool(ANIM_WALKING, true);
         audioSource.Stop();
         audioSource.loop = true;
-        audioSource.PlayOneShot(walkSound);
+        //audioSource.PlayOneShot(walkSound);
+        audioSource.clip = walkSound;
+        audioSource.Play();
     }
 
     private void CheckTarget()
     {
         if (agent.remainingDistance <= agent.stoppingDistance)
         {
+            agent.speed = WALK_SPEED;
             estado = Estado.Idle;
             animator.SetBool(ANIM_RUNNING, false);
             animator.SetBool(ANIM_WALKING, false);
             audioSource.Stop();
-            audioSource.loop = false;
-            
         }
     }
 
@@ -282,22 +280,24 @@ public class PlayerScript : MonoBehaviour {
 
     private void ShootEnemy(RaycastHit rch)
     {
+        estado = Estado.Shoot;
         transform.LookAt(rch.transform.position);
         animator.SetTrigger(SHOOT_TRIGGER);
-        Invoke("PlayShootSound", 1);
-        Ray ray = new Ray(transform.position, (rch.transform.position - transform.position));
-        //Debug.DrawRay(transform.position, (rch.transform.position - transform.position), Color.red, 5);
-        bool impacto = Physics.Raycast(ray, out rch, SHOOT_DISTANCE);
-        if (impacto && rch.transform.gameObject.CompareTag("Vigilante"))
-        {
-            rch.transform.gameObject.GetComponent<VigilanteScript>().Kill();
-        }
+        Invoke("Shoot", 1f);
     }
 
-    public void PlayShootSound()
+    public void Shoot()
     {
         audioSource.loop = false;
         audioSource.PlayOneShot(shotSound);
+        Ray ray = new Ray(transform.position, (rchTmp.transform.position - transform.position));
+        bool impacto = Physics.Raycast(ray, out rchTmp, SHOOT_DISTANCE);
+        if (impacto && rchTmp.transform.gameObject.CompareTag("Vigilante"))
+        {
+            rchTmp.transform.gameObject.GetComponent<VigilanteScript>().Kill();
+        }
+        estado = Estado.Idle;
     }
+    
 
 }

@@ -4,4 +4,10 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/_GameAssets/Scenes/Portada.unity
+    guid: eb80020f09d354847bef32926d53ae4a
+  - enabled: 1
+    path: Assets/_GameAssets/Scenes/MainScene.unity
+    guid: 977270244c4f75948835e37b7890bfea

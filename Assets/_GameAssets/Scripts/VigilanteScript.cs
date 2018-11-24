@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UI;
 
 public class VigilanteScript : MonoBehaviour {
 
@@ -15,10 +16,14 @@ public class VigilanteScript : MonoBehaviour {
     private const string ESTADO_WALKING = "walking";
     private const string ESTADO_DEAD = "death";
 
+    //UI
+    public Text textAdvertencia;
+    private string textoInicial;
+
     private Vector3 target;
 
     [Header("Puntos de patrulla")]
-    public Transform[] targets = new Transform[4];
+    public Transform[] targets = new Transform[8];
     
     [Header("Cameras")]
     public CamerasManager cm;
@@ -31,14 +36,17 @@ public class VigilanteScript : MonoBehaviour {
     private PlayerScript playerScript;
     private float detectionDistance = 10f; //Distancia de detección
     private float detectionDegrees = 25f; //Grados de vision
+    private float walkingDetectionDistance = 5f;
+    private float runningDetectionDistance = 10f;
 
     void Start ()
     {
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
-        SetNewTarget();
         playerTransform = GameObject.Find("Paniagua").transform;
         playerScript = GameObject.Find("Paniagua").GetComponent<PlayerScript>();
+        textoInicial = textAdvertencia.text;
+        SetNewTarget();
     }
 
     void Update()
@@ -55,13 +63,17 @@ public class VigilanteScript : MonoBehaviour {
                 CheckTargets();
                 break;
         }
+        if (state == State.Death)
+        {
+            return;
+        }
         CheckPlayer();
         EvaluarRuido();
     }
 
     private void CheckPlayer()
     {
-        float vDistanceToPlayer = Vector3.Distance(transform.position, playerTransform.transform.position);
+        float vDistanceToPlayer = GetDistanceToPlayer();
         Vector3 direccion = Vector3.Normalize(playerTransform.transform.position - transform.position);
         float angle = Vector3.Angle(direccion, transform.forward);
         if (vDistanceToPlayer < detectionDistance && angle < detectionDegrees)
@@ -82,17 +94,19 @@ public class VigilanteScript : MonoBehaviour {
         }
     }
 
+    private float GetDistanceToPlayer()
+    {
+        return Vector3.Distance(transform.position, playerTransform.transform.position);
+    }
+
     public void SetExternalTarget(Vector3 targetPosition)
     {
-        print("setting external target");
         CancelInvoke();
-        if (state != State.Walking)
-        {
-            animator.SetBool(ESTADO_WALKING, true);
-            state = State.Walking;
-        }
         target = targetPosition;
+        agent.isStopped = false;
         agent.destination = target;
+        animator.SetBool(ESTADO_WALKING, true);
+        state = State.Walking;
         obsessed = true;
     }
 
@@ -106,8 +120,8 @@ public class VigilanteScript : MonoBehaviour {
                 do
                 {
                     target = targets[Random.Range(0, targets.Length)].position;
-                    agent.destination = target;
-                } while (Vector3.Distance(this.transform.position, target) < agent.stoppingDistance*2);
+                } while (Vector3.Distance(this.transform.position, target) < (agent.stoppingDistance*1.2f));
+                agent.isStopped = false;
                 agent.destination = target;
                 state = State.Walking;
                 animator.SetBool(ESTADO_WALKING, true);
@@ -121,6 +135,7 @@ public class VigilanteScript : MonoBehaviour {
         {
             state = State.Idle;
             animator.SetBool(ESTADO_WALKING, false);
+            agent.isStopped = true;
             obsessed = false;
             Invoke("SetNewTarget", Random.Range(MIN_TIME_TO_NEW_TARGET, MAX_TIME_TO_NEW_TARGET));
         }
@@ -133,19 +148,35 @@ public class VigilanteScript : MonoBehaviour {
 
     public void Kill()
     {
+        textAdvertencia.text = textoInicial + "eliminado";
         state = State.Death;
         animator.SetBool(ESTADO_DEAD, true);
     }
 
     private void EvaluarRuido()
     {
+        bool teEscucha = false;
         switch(playerScript.GetEstado()){
             case PlayerScript.Estado.Walk:
-                print("DESDE VIGILANTE, PLAYER ANDANDO");
+                if (GetDistanceToPlayer() < walkingDetectionDistance)
+                {
+                    teEscucha = true;
+                    textAdvertencia.text = textoInicial + "te oye andar";
+                    SetExternalTarget(playerTransform.position);
+                }
                 break;
             case PlayerScript.Estado.Run:
-                print("DESDE VIGILANTE, PLAYER CORRIENDO");
+                if (GetDistanceToPlayer() < runningDetectionDistance)
+                {
+                    teEscucha = true;
+                    textAdvertencia.text = textoInicial + "te oye correr";
+                    SetExternalTarget(playerTransform.position);
+                }
                 break;
+        }
+        if (!teEscucha)
+        {
+            textAdvertencia.text = textoInicial + "patrullando";
         }
     }
 }
